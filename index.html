@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#C98A2C">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-title" content="Especias ISSA">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Rutero de Especias</title>
@@ -689,6 +693,7 @@ async function addVend(){
 }
 const togVend=(id,a)=>updateDoc(doc(db,'usuarios',id),{activo:a});
 
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 Object.assign(window,{S,modo,registrar,olvide,entrar,salir,goTo,toggleFab,closeSheet,abrir,crearNuevo,elegir,cant,fijar,atras,confirmar,mover,editItem,quitar,agregarItem,facturar,addProd,editProd,saveProd,delProd,seed,addVend,togVend,deleteDoc,doc,db});
 </script>
 </body>
