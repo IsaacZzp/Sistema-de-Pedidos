@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#C98A2C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Rutero de Especias</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cumin: #3D2B1F;
+    --parchment: #FAF6EC;
+    --card: #FFFFFF;
+    --line: #E4D8C3;
+    --saffron: #C98A2C;
+    --saffron-dark: #A66F1E;
+    --paprika: #A63A2E;
+    --cardamom: #5B7553;
+    --muted: #8A7A64;
+    --pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--parchment);
+    color:var(--cumin);
+    font-family:'Public Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    margin:0;
+  }
+  .app{max-width:720px; margin:0 auto; padding:18px 16px 110px;}
+  header.top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+    padding-bottom:14px;
+    border-bottom:2px solid var(--cumin);
+    margin-bottom:16px;
+  }
+  header.top h1{font-size:22px; letter-spacing:0.2px;}
+  header.top span{font-size:12px; color:var(--muted);}
+
+  /* --- Base "pressable" feedback for every selectable control --- */
+  .pressable{
+    transition: transform .16s var(--pop), box-shadow .16s var(--pop), background-color .15s, border-color .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pressable:active{ transform: scale(0.90); }
+
+  nav.tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:18px;
+    overflow-x:auto;
+    padding:4px 2px 8px;
+  }
+  nav.tabs button{
+    flex:0 0 auto;
+    background:#fff;
+    border:1.5px solid var(--line);
+    color:var(--cumin);
+    padding:9px 16px;
+    border-radius:14px;
+    font-family:'Public Sans', sans-serif;
+    font-size:13.5px;
+    font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+    transition: transform .16s var(--pop), box-shadow .16s var(--pop), background-color .15s, border-color .15s;
+  }
+  nav.tabs button:active{ transform: scale(0.92); }
+  nav.tabs button.active{
+    background:var(--saffron);
+    border-color:var(--saffron);
+    color:#fff;
+    transform: scale(1.06);
+    box-shadow: 0 5px 14px rgba(201,138,44,0.35);
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .card h2{font-size:18px; margin-bottom:4px;}
+  .subtitle{font-size:13px; color:var(--muted); margin-bottom:14px;}
+
+  label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--muted);
+    margin-bottom:4px;
+    margin-top:10px;
+  }
+  input[type=text], input[type=number]{
+    width:100%;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:9px 12px;
+    font-size:15px;
+    font-family:'Public Sans', sans-serif;
+    background:#fff;
+    color:var(--cumin);
+  }
+  input:focus{outline:2px solid var(--saffron); outline-offset:1px;}
+
+  .row{display:flex; gap:10px;}
+  .row > *{flex:1;}
+
+  button.primary{
+    background:var(--saffron);
+    color:#fff;
+    border:none;
+    padding:12px 18px;
+    border-radius:14px;
+    font-weight:700;
+    font-size:14.5px;
+    cursor:pointer;
+    font-family:'Public Sans', sans-serif;
+    transition: transform .16s var(--pop), box-shadow .16s var(--pop), background-color .15s;
+  }
+  button.primary:hover{background:var(--saffron-dark);}
+  button.primary:active{ transform: scale(0.93); }
+  button.primary:disabled{background:#D9CBB0; cursor:not-allowed; transform:none;}
+
+  button.ghost{
+    background:#fff;
+    border:1.5px solid var(--line);
+    color:var(--cumin);
+    padding:9px 14px;
+    border-radius:14px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Public Sans', sans-serif;
+    transition: transform .16s var(--pop), box-shadow .16s var(--pop), background-color .15s, border-color .15s;
+  }
+  button.ghost:active{ transform: scale(0.93); }
+  button.ghost.danger{color:var(--paprika); border-color:#E3C4BE;}
+
+  /* circular icon buttons: edit / delete / reorder / qty */
+  button.icon{
+    background:#fff;
+    border:1.5px solid var(--line);
+    width:32px; height:32px;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:14px;
+    line-height:1;
+    color:var(--cumin);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+    transition: transform .16s var(--pop), box-shadow .16s var(--pop), background-color .15s, border-color .15s;
+  }
+  button.icon:active{ transform: scale(0.85); }
+  button.icon:disabled{opacity:0.3; cursor:default; transform:none;}
+  button.icon.danger{color:var(--paprika); border-color:#E3C4BE;}
+
+  .letra-sep{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:16px 2px 8px;
+  }
+  .letra-sep .letra-circle{
+    width:26px; height:26px;
+    border-radius:50%;
+    background:var(--cumin);
+    color:#fff;
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+  }
+  .letra-sep .letra-line{
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  .qty-control{display:flex; align-items:center; gap:8px;}
+  .qty-control input{width:52px; text-align:center; padding:6px 4px; border-radius:10px;}
+  .qty-btn{
+    width:32px; height:32px;
+    border-radius:50%;
+    border:1.5px solid var(--line);
+    background:#fff;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    color:var(--cumin);
+    flex:0 0 auto;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .qty-btn:active{ transform: scale(0.85); }
+
+  /* --- Franjas del rutero: un renglón horizontal por especia --- */
+  .franjas{ display:flex; flex-direction:column; gap:7px; }
+  .franja{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 12px;
+    border-radius:16px;
+    border:1.5px solid transparent;
+    background:#FBF8F1;
+  }
+  .franja:nth-child(even){ background:#F5EFE1; }
+  .franja-avatar{
+    width:38px; height:38px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:15px;
+    flex:0 0 auto;
+  }
+  .franja-info{ flex:1; min-width:0; }
+  .franja-nombre{ font-weight:700; font-size:14.5px; }
+  .franja-precio{ font-size:12px; color:var(--muted); margin-top:1px; }
+  .franja-actions{ display:flex; gap:6px; flex:0 0 auto; }
+
+  /* Franja seleccionable (pedido): se resalta y "se acerca" al elegir cantidad */
+  .franja.seleccionable{ cursor:default; }
+  .franja.seleccionada{
+    background:#FBEFD8;
+    border-color:var(--saffron);
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(201,138,44,0.18);
+  }
+
+  table.factura{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13.5px;
+  }
+  table.factura th{
+    text-align:left;
+    font-size:11.5px;
+    color:var(--muted);
+    font-weight:700;
+    padding:6px 4px;
+    border-bottom:1.5px solid var(--cumin);
+  }
+  table.factura td{
+    padding:8px 4px;
+    border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  table.factura td.num, table.factura th.num{text-align:right;}
+  table.factura input[type=number]{padding:6px; font-size:13.5px;}
+  .orden-btns{display:flex; flex-direction:column; gap:3px;}
+  .orden-btns button{
+    width:24px; height:20px;
+    font-size:10px;
+    padding:0;
+    border-radius:8px;
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--cumin);
+    cursor:pointer;
+  }
+  .orden-btns button:active{ transform:scale(0.85); }
+
+  .total-line{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-top:14px;
+    padding-top:12px;
+    border-top:2px solid var(--cumin);
+  }
+  .total-line .label{font-family:'Fraunces', serif; font-size:15px; font-weight:600;}
+  .total-line .value{font-family:'Fraunces', serif; font-size:24px; font-weight:700; color:var(--saffron-dark);}
+
+  .pedido-card{
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  .pedido-info .folio{font-weight:700; font-size:14.5px;}
+  .pedido-info .meta{font-size:12px; color:var(--muted); margin-top:2px;}
+  .badge{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    padding:3px 9px;
+    border-radius:999px;
+    margin-top:4px;
+  }
+  .badge.pendiente{background:#F3E3C6; color:var(--saffron-dark);}
+  .badge.facturado{background:#DEE7D9; color:var(--cardamom);}
+
+  .empty{
+    text-align:center;
+    padding:30px 10px;
+    color:var(--muted);
+    font-size:13.5px;
+  }
+
+  select{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:7px;
+    padding:9px 10px;
+    font-size:14.5px;
+    font-family:'Public Sans', sans-serif;
+    background:#fff;
+    color:var(--cumin);
+  }
+
+  .toast{
+    position:fixed;
+    bottom:18px;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--cumin);
+    color:#fff;
+    padding:10px 18px;
+    border-radius:8px;
+    font-size:13.5px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.25s;
+    z-index:50;
+  }
+  .toast.show{opacity:1;}
+
+
+  button.primary.danger{background:var(--paprika);}
+  .topbar{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:16px;}
+  .tarifa-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .tarifa-btn{
+    background:#FBEFD8; border:2px solid var(--saffron); color:var(--cumin);
+    border-radius:20px; padding:26px 10px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    font-family:'Fraunces', serif; font-size:28px; font-weight:700;
+    transition: transform .16s var(--pop), box-shadow .16s var(--pop), background-color .15s;
+  }
+  .tarifa-btn small{font-family:'Public Sans', sans-serif; font-size:12px; font-weight:600; color:var(--muted);}
+  .tarifa-btn:hover{transform:scale(1.04); box-shadow:0 6px 16px rgba(201,138,44,0.3);}
+  .tarifa-btn:active{transform:scale(0.94);}
+
+  .fab{
+    position:fixed; right:20px; bottom:22px; width:60px; height:60px;
+    border-radius:50%; border:none; background:var(--saffron); color:#fff;
+    font-size:34px; line-height:1; cursor:pointer; z-index:30;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 20px rgba(201,138,44,0.45);
+    transition: transform .2s var(--pop), box-shadow .16s var(--pop);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .fab:active{transform:scale(0.88);}
+  .fab.open{transform:rotate(45deg) scale(1.08);}
+  .fab-menu{
+    position:fixed; right:20px; bottom:94px; z-index:30; display:none;
+    background:#fff; border:1.5px solid var(--line); border-radius:18px; padding:8px;
+    box-shadow:0 10px 26px rgba(61,43,31,0.2); transform-origin:bottom right;
+  }
+  .fab-menu.show{display:block; animation:pop-in .2s var(--pop);}
+  .fab-menu button{
+    background:var(--saffron); color:#fff; border:none; border-radius:14px;
+    padding:12px 18px; font-family:'Public Sans', sans-serif; font-weight:700; font-size:14.5px;
+    cursor:pointer; white-space:nowrap; transition:transform .16s var(--pop);
+  }
+  .fab-menu button:active{transform:scale(0.93);}
+  @keyframes pop-in{from{transform:scale(0.8); opacity:0;} to{transform:scale(1); opacity:1;}}
+
+  .sheet-bg{position:fixed; inset:0; background:rgba(61,43,31,0.45); display:none; align-items:flex-end; justify-content:center; z-index:60;}
+  .sheet-bg.show{display:flex;}
+  .sheet{background:#fff; width:100%; max-width:480px; border-radius:22px 22px 0 0; padding:20px 18px 24px; animation:pop-in .2s var(--pop); transform-origin:bottom center;}
+  .sheet h2{font-size:18px; margin-bottom:8px;}
+  .sheet-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:18px;}
+
+  @media print{
+    nav.tabs, header.top, .no-print, .fab, .fab-menu{display:none !important;}
+    body{background:#fff;}
+  }
+
+  .login{max-width:380px; margin:12vh auto 0;}
+  .login h1{font-size:26px; margin-bottom:6px;}
+  .login .primary{width:100%; margin-top:16px;}
+  #estado{font-size:12px; color:var(--cardamom); font-weight:600;}
+  #estado.off{color:var(--paprika);}
+  .top a{color:var(--paprika); font-weight:600; cursor:pointer; font-size:12px;}
+  .enlace{color:var(--saffron-dark); font-weight:600; font-size:13px; cursor:pointer;}
+  .badge.tier{background:#EFE6D3; color:var(--cumin);}
+</style>
+</head>
+<body>
+<div id="login" class="app"><div class="card login">
+  <h1>Rutero de Especias</h1>
+  <div id="fEntrar"><div class="subtitle">Entra con tu correo y contraseña.</div>
+    <label for="lu">Correo</label><input type="text" id="lu" autocapitalize="none" inputmode="email" autocomplete="username">
+    <label for="lp">Contraseña</label><input type="password" id="lp" autocomplete="current-password" style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:9px 12px;font-size:15px" onkeydown="if(event.key==='Enter')entrar()">
+    <button class="primary" onclick="entrar()">Entrar</button>
+    <div style="display:flex;justify-content:space-between;gap:10px;margin-top:14px"><a class="enlace" onclick="modo('registro')">Crear cuenta</a><a class="enlace" onclick="olvide()">¿Olvidaste tu contraseña?</a></div></div>
+  <div id="fRegistro" style="display:none"><div class="subtitle">Escribe tu nombre y correo. Te enviaremos una contraseña de 6 caracteres a ese correo.</div>
+    <label for="rn">Nombre</label><input type="text" id="rn">
+    <label for="re">Correo</label><input type="text" id="re" autocapitalize="none" inputmode="email">
+    <button class="primary" onclick="registrar()">Crear cuenta</button>
+    <div style="margin-top:14px"><a class="enlace" onclick="modo('entrar')">← Ya tengo cuenta</a></div></div>
+</div></div>
+<div id="appwrap" class="app" style="display:none">
+  <header class="top" id="top"><h1>Rutero de Especias</h1><span><span id="estado"></span> · <b id="quien"></b> · <a onclick="salir()">Salir</a></span></header>
+  <nav class="tabs" id="tabs"></nav>
+  <div id="view"></div>
+</div>
+<div class="fab-menu" id="fabMenu"><button onclick="crearNuevo()">Crear nuevo pedido</button></div>
+<button class="fab" id="fab" style="display:none" onclick="toggleFab()" aria-label="Nuevo pedido">+</button>
+<div class="sheet-bg" id="sheet" onclick="if(event.target===this)closeSheet()"><div class="sheet"></div></div>
+<div class="toast" id="toast"></div>
+<script type="module">
+import {initializeApp,getApps} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,onAuthStateChanged,deleteUser,sendPasswordResetEmail} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,updateDoc,deleteDoc,getDoc,onSnapshot,query,where} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+// ====== CONFIGURACIÓN (ver INSTRUCCIONES.md) ======
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCogFj_Qzrw9t3oJTWzJyrIfWxTM1Xfe5k",
+  authDomain: "especias-issa.firebaseapp.com",
+  projectId: "especias-issa",
+  storageBucket: "especias-issa.firebasestorage.app",
+  messagingSenderId: "334477342831",
+  appId: "1:334477342831:web:2f54549a4e4f1ef53ab59a"
+};
+const ADMIN_EMAIL = 'admin@rutero.app';   // cuenta de quien factura (puede escribir solo "admin" para entrar)
+// Envío de la contraseña por correo (cuenta gratis en emailjs.com, ver INSTRUCCIONES.md)
+const EMAILJS = {publicKey:'TjXZm-rZf1lfp6jia', serviceId:'service_6dm33cl', templateId:'template_qdin4uy'};
+// ==================================================
+
+const $=id=>document.getElementById(id);
+const money=n=>'$ '+new Intl.NumberFormat('es-CO',{maximumFractionDigits:2}).format(n);
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const TARIFAS=[1500,1600,1800,1900];
+const COLORS=['#C98A2C','#A63A2E','#5B7553','#7A5C3E','#B0733A','#6E7F4E'];
+const color=n=>{let h=0;for(const c of n)h=c.charCodeAt(0)+((h<<5)-h);return COLORS[Math.abs(h)%COLORS.length];};
+const fechaTxt=t=>new Date(t).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});
+const tot=p=>p.items.reduce((s,i)=>s+i.cantidad*i.precio,0);
+const mail=u=>{u=u.trim().toLowerCase();return u.includes('@')?u:u+'@rutero.app';};
+const okMail=e=>/^\S+@\S+\.\S+$/.test(e);
+const sorted=l=>[...l].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es',{sensitivity:'base'}));
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+const app=initializeApp(FIREBASE_CONFIG), auth=getAuth(app);
+const db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
+let S={user:null,admin:false,nombre:'',productos:[],pedidos:[],usuarios:[],screen:'pedidos',pid:null,tarifa:null,draft:{},cliente:''};
+let unsubs=[];
+
+// ---------- acceso ----------
+async function entrar(){
+  const u=$('lu').value, p=$('lp').value;
+  if(!u.trim()||!p)return toast('Escribe tu correo y contraseña');
+  try{await signInWithEmailAndPassword(auth,mail(u),p);}catch(e){toast('Correo o contraseña incorrectos');}
+}
+let registrando=false;
+const modo=m=>{$('fEntrar').style.display=m==='entrar'?'':'none';$('fRegistro').style.display=m==='registro'?'':'none';};
+const gen=()=>{const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let p;
+  do{p=[...crypto.getRandomValues(new Uint8Array(6))].map(x=>a[x%a.length]).join('');}while(!/\d/.test(p)||!/[A-Z]/.test(p));return p;};
+async function enviarClave(email,nombre,clave){
+  const r=await fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({service_id:EMAILJS.serviceId,template_id:EMAILJS.templateId,user_id:EMAILJS.publicKey,
+      template_params:{to_email:email,to_name:nombre,clave,app_name:'Rutero de Especias'}})});
+  if(!r.ok)throw new Error('email');
+}
+// crea la cuenta con clave aleatoria, la envía por correo y guarda el perfil
+async function crearCuenta(nombre,email,activo,authInst){
+  if(EMAILJS.publicKey.startsWith('PEGAR'))throw {code:'email-config'};
+  const clave=gen();
+  const c=await createUserWithEmailAndPassword(authInst,email,clave);
+  try{await enviarClave(email,nombre,clave);}catch(e){await deleteUser(c.user);throw {code:'email-fail'};}
+  await setDoc(doc(db,'usuarios',c.user.uid),{nombre,email,activo});
+}
+const msgErr=e=>e.code==='auth/email-already-in-use'?'Ese correo ya está registrado':
+  e.code==='email-config'?'Falta configurar el envío de correos (ver INSTRUCCIONES)':
+  e.code==='email-fail'?'No se pudo enviar el correo. No se creó la cuenta.':'No se pudo crear la cuenta. Revisa tu conexión.';
+async function registrar(){
+  const nombre=$('rn').value.trim(), email=$('re').value.trim().toLowerCase();
+  if(!nombre||!okMail(email))return toast('Escribe tu nombre y un correo válido');
+  registrando=true;
+  try{await crearCuenta(nombre,email,false,auth);await signOut(auth);
+    $('lu').value=email;modo('entrar');toast('Cuenta creada. Revisa tu correo (y spam): ahí está tu contraseña.');
+  }catch(e){toast(msgErr(e));}
+  finally{registrando=false;if(auth.currentUser)signOut(auth);}
+}
+async function olvide(){
+  if(!$('lu').value.trim())return toast('Escribe tu correo arriba');
+  try{await sendPasswordResetEmail(auth,mail($('lu').value));}catch(e){}
+  toast('Si el correo está registrado, te enviamos un enlace para cambiar la contraseña.');
+}
+function salir(){signOut(auth);}
+onAuthStateChanged(auth,async u=>{
+  if(registrando)return;
+  unsubs.forEach(f=>f()); unsubs=[];
+  if(!u){S.user=null;$('login').style.display='';$('appwrap').style.display='none';return;}
+  S.admin=u.email===ADMIN_EMAIL; S.nombre='Administración';
+  if(!S.admin){
+    try{const d=await getDoc(doc(db,'usuarios',u.uid));
+      if(!d.exists()||!d.data().activo){toast(d.exists()?'Tu cuenta está pendiente de aprobación por la empresa.':'Cuenta no habilitada. Habla con la empresa.');await signOut(auth);return;}
+      S.nombre=d.data().nombre;
+    }catch(e){toast('No se pudo verificar la cuenta. Revisa tu conexión.');await signOut(auth);return;}
+  }
+  S.user=u; S.pid=null; S.draft={}; S.cliente='';
+  $('login').style.display='none'; $('appwrap').style.display='';
+  $('quien').textContent=S.nombre;
+  const known=new Set(); let ready=false;
+  const pq=S.admin?collection(db,'pedidos'):query(collection(db,'pedidos'),where('vendedorUid','==',u.uid));
+  unsubs.push(onSnapshot(pq,{includeMetadataChanges:true},s=>{
+    s.docChanges().forEach(c=>{if(c.type==='added'){
+      if(ready&&S.admin&&!known.has(c.doc.id)&&!c.doc.metadata.hasPendingWrites)toast('Nuevo pedido de '+c.doc.data().vendedorNombre);
+      known.add(c.doc.id);}});
+    if(!s.metadata.fromCache)ready=true;
+    S.pedidos=s.docs.map(d=>({id:d.id,pend:d.metadata.hasPendingWrites,...d.data()})).sort((a,b)=>b.fecha-a.fecha);
+    if(['pedidos','factura'].includes(S.screen))render();
+  },e=>toast('Sin permiso para leer pedidos')));
+  unsubs.push(onSnapshot(collection(db,'productos'),s=>{
+    S.productos=s.docs.map(d=>({id:d.id,...d.data()}));
+    if(['tarifa','rutero','especias'].includes(S.screen))render();
+  }));
+  if(S.admin)unsubs.push(onSnapshot(collection(db,'usuarios'),s=>{
+    S.usuarios=s.docs.map(d=>({id:d.id,...d.data()}));
+    if(S.screen==='vendedores')render();
+  }));
+  goTo('pedidos');
+});
+const estado=()=>{const e=$('estado');e.textContent=navigator.onLine?'● En vivo':'● Sin conexión';e.className=navigator.onLine?'':'off';};
+addEventListener('online',estado);addEventListener('offline',estado);estado();
+
+// ---------- navegación ----------
+function goTo(sc){S.screen=sc;closeFab();scrollTo(0,0);render();}
+function render(){
+  const sc=S.screen, main=['pedidos','especias','vendedores'].includes(sc);
+  $('top').style.display=main?'':'none';
+  $('tabs').style.display=(main&&S.admin)?'':'none';
+  $('fab').style.display=(sc==='pedidos'&&!S.admin)?'':'none';
+  if(S.admin)$('tabs').innerHTML=[['pedidos','Pedidos'],['especias','Especias'],['vendedores','Vendedores']]
+    .map(([k,t])=>`<button class="${sc===k?'active':''}" onclick="goTo('${k}')">${t}</button>`).join('');
+  $('view').innerHTML=V[sc]();
+}
+function toggleFab(){const a=!$('fabMenu').classList.contains('show');$('fabMenu').classList.toggle('show',a);$('fab').classList.toggle('open',a);}
+function closeFab(){$('fabMenu').classList.remove('show');$('fab').classList.remove('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('#fab')&&!e.target.closest('#fabMenu'))closeFab();});
+const sheet=h=>{document.querySelector('#sheet .sheet').innerHTML=h;$('sheet').classList.add('show');};
+const closeSheet=()=>$('sheet').classList.remove('show');
+const letra=l=>`<div class="letra-sep"><span class="letra-circle">${l}</span><span class="letra-line"></span></div>`;
+
+// ---------- pantallas ----------
+const V={};
+V.pedidos=()=>`<div class="card"><h2>${S.admin?'Todos los pedidos':'Mis pedidos'}</h2>
+  <div class="subtitle">${S.admin?'Llegan en vivo desde los teléfonos de los vendedores.':'Tus pedidos y su estado.'}</div>
+  ${S.pedidos.length?S.pedidos.map(p=>`<div class="pedido-card"><div class="pedido-info">
+    <div class="folio">${p.folio} — ${esc(p.cliente)}</div>
+    <div class="meta">${fechaTxt(p.fecha)} · ${esc(p.vendedorNombre)} · Precio ${money(p.tarifa)} · ${p.items.length} especias · ${money(tot(p))}</div>
+    <span class="badge ${p.facturado?'facturado':'pendiente'}">${p.facturado?'Facturado':'Pendiente'}</span>${p.pend?' <span class="badge tier">Sin enviar</span>':''}</div>
+    <button class="ghost" onclick="abrir('${p.id}')">${S.admin&&!p.facturado?'Facturar':'Ver'}</button></div>`).join('')
+  :`<div class="empty">${S.admin?'Aún no han llegado pedidos.':'Aún no tienes pedidos. Toca (+) para crear el primero.'}</div>`}</div>`;
+
+V.tarifa=()=>`<div class="topbar"><button class="ghost" onclick="goTo('pedidos')">← Atrás</button></div>
+  <div class="card"><h2>Crear nuevo pedido</h2><div class="subtitle">Elige el precio de las especias que vas a pedir.</div>
+  <div class="tarifa-grid">${TARIFAS.map(t=>`<button class="tarifa-btn" onclick="elegir(${t})"><span>${money(t)}</span><small>${S.productos.filter(p=>p.precio===t).length} especias</small></button>`).join('')}</div></div>`;
+
+V.rutero=()=>{
+  const ps=sorted(S.productos.filter(p=>p.precio===S.tarifa)); let last='';
+  const sel=Object.values(S.draft).filter(c=>c>0), un=sel.reduce((a,b)=>a+b,0);
+  const list=ps.length?'<div class="franjas">'+ps.map(p=>{const l=p.nombre[0].toUpperCase(),c=S.draft[p.id]||0;
+    const h=(l!==last?letra(l):'');last=l;
+    return h+`<div class="franja seleccionable ${c>0?'seleccionada':''}"><div class="franja-avatar" style="background:${color(p.nombre)}">${l}</div>
+      <div class="franja-info"><div class="franja-nombre">${esc(p.nombre)}</div><div class="franja-precio">${money(p.precio)} c/u</div></div>
+      <div class="qty-control"><button class="qty-btn" onclick="cant('${p.id}',-1)">−</button><input type="number" min="0" value="${c}" onchange="fijar('${p.id}',this.value)"><button class="qty-btn" onclick="cant('${p.id}',1)">+</button></div></div>`;}).join('')+'</div>'
+    :'<div class="empty">No hay especias con este precio.</div>';
+  return `<div class="topbar"><button class="ghost" onclick="atras()">← Atrás</button><button class="primary" onclick="confirmar()">Confirmar pedido</button></div>
+  <div class="card"><h2>Rutero · ${money(S.tarifa)}</h2><div class="subtitle">${sel.length} especias · ${un} unidades seleccionadas</div>
+  <label for="cli">Cliente</label><input type="text" id="cli" placeholder="Nombre del cliente" value="${esc(S.cliente)}" oninput="S.cliente=this.value"></div>
+  <div class="card"><h2>Especias</h2><div class="subtitle">Indica la cantidad de cada especia.</div>${list}</div>`;
+};
+
+V.factura=()=>{
+  const p=S.pedidos.find(x=>x.id===S.pid); if(!p)return '<div class="empty">Pedido no disponible.</div>';
+  const ed=S.admin&&!p.facturado;
+  const filas=p.items.map((it,i)=>`<tr>
+    <td class="no-print">${ed?`<div class="orden-btns"><button ${i==0?'disabled':''} onclick="mover(${i},-1)">▲</button><button ${i==p.items.length-1?'disabled':''} onclick="mover(${i},1)">▼</button></div>`:''}</td>
+    <td>${esc(it.nombre)}</td>
+    <td class="num"><input type="number" min="0" value="${it.cantidad}" ${ed?'':'disabled'} onchange="editItem(${i},'cantidad',this.value)"></td>
+    <td class="num"><input type="number" min="0" step="0.01" value="${it.precio}" ${ed?'':'disabled'} onchange="editItem(${i},'precio',this.value)"></td>
+    <td class="num">${money(it.cantidad*it.precio)}</td>
+    <td class="no-print">${ed?`<button class="icon" onclick="quitar(${i})">✕</button>`:''}</td></tr>`).join('');
+  const libres=sorted(S.productos).filter(x=>!p.items.some(i=>i.productId===x.id));
+  return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>${p.folio}</h2>
+    <div class="subtitle" style="margin-bottom:0">${fechaTxt(p.fecha)} · Cliente: ${esc(p.cliente)} · Vendedor: ${esc(p.vendedorNombre)}</div></div>
+    <span class="badge ${p.facturado?'facturado':'pendiente'}">${p.facturado?'Facturado':'Pendiente'}</span></div></div>
+  <div class="card"><h2 style="font-size:15px;margin-bottom:10px">Detalle de la factura</h2>
+  ${ed?'<div class="subtitle">Usa las flechas para ordenar los productos como prefieras.</div>':''}
+  <table class="factura"><thead><tr><th class="no-print"></th><th>Producto</th><th class="num">Cantidad</th><th class="num">Valor unitario</th><th class="num">Valor total</th><th class="no-print"></th></tr></thead><tbody>${filas}</tbody></table>
+  ${ed&&libres.length?`<div class="no-print" style="margin-top:14px;display:flex;gap:8px;align-items:flex-end"><div style="flex:1"><label for="addSel">Agregar especia</label><select id="addSel">${libres.map(x=>`<option value="${x.id}">${esc(x.nombre)} · ${money(x.precio)}</option>`).join('')}</select></div><button class="ghost" onclick="agregarItem()">Agregar</button></div>`:''}
+  <div class="total-line"><div class="label">Total factura</div><div class="value">${money(tot(p))}</div></div></div>
+  <div class="card no-print" style="display:flex;gap:10px;flex-wrap:wrap">${ed?'<button class="primary" onclick="facturar()">Marcar como facturada</button>':''}<button class="ghost" onclick="print()">Imprimir</button><button class="ghost" onclick="goTo(\'pedidos\')">Volver</button></div>`;
+};
+
+V.especias=()=>{
+  const ps=sorted(S.productos); let last='';
+  return `<div class="card"><h2>Especias</h2><div class="subtitle">Catálogo que ven los vendedores, agrupado por precio.</div>
+  ${ps.length?'<div class="franjas">'+ps.map(p=>{const l=p.nombre[0].toUpperCase(),h=(l!==last?letra(l):'');last=l;
+    return h+`<div class="franja"><div class="franja-avatar" style="background:${color(p.nombre)}">${l}</div><div class="franja-info"><div class="franja-nombre">${esc(p.nombre)}</div><div class="franja-precio">${money(p.precio)} c/u</div></div>
+    <div class="franja-actions"><button class="icon" onclick="editProd('${p.id}')">✎</button><button class="icon danger" onclick="delProd('${p.id}')">✕</button></div></div>`;}).join('')+'</div>'
+  :'<div class="empty">Sin especias. Agrega la primera o carga las de ejemplo.</div><button class="ghost" onclick="seed()">Cargar especias de ejemplo</button>'}</div>
+  <div class="card"><h2>Agregar especia</h2><div class="row"><div><label for="nn">Nombre</label><input type="text" id="nn" placeholder="Ej: Pimentón dulce"></div>
+  <div><label for="np">Precio</label><select id="np">${TARIFAS.map(t=>`<option value="${t}">${money(t)}</option>`).join('')}</select></div></div>
+  <div style="margin-top:12px"><button class="primary" onclick="addProd()">Agregar</button></div></div>`;
+};
+
+V.vendedores=()=>`<div class="card"><h2>Vendedores</h2><div class="subtitle">Los vendedores entran con su correo. Las cuentas creadas por ellos mismos quedan pendientes hasta que las actives.</div>
+  ${S.usuarios.length?S.usuarios.map(u=>`<div class="pedido-card"><div class="pedido-info"><div class="folio">${esc(u.nombre)}</div><div class="meta">${esc(u.email||u.usuario)}</div>
+  <span class="badge ${u.activo?'facturado':'pendiente'}">${u.activo?'Activo':'Sin acceso'}</span></div><button class="ghost" onclick="togVend('${u.id}',${!u.activo})">${u.activo?'Desactivar':'Activar'}</button></div>`).join('')
+  :'<div class="empty">Aún no hay vendedores.</div>'}</div>
+  <div class="card"><h2>Nuevo vendedor</h2><div class="subtitle">Se le enviará una contraseña aleatoria a su correo.</div>
+  <label for="vn">Nombre</label><input type="text" id="vn" placeholder="Ej: Juan Pérez">
+  <label for="ve">Correo</label><input type="text" id="ve" placeholder="juan@correo.com" autocapitalize="none" inputmode="email">
+  <div style="margin-top:12px"><button class="primary" onclick="addVend()">Crear vendedor</button></div></div>`;
+
+// ---------- acciones ----------
+const abrir=id=>{S.pid=id;goTo('factura');};
+const crearNuevo=()=>{S.tarifa=null;S.draft={};S.cliente='';goTo('tarifa');};
+const elegir=t=>{S.tarifa=t;S.draft={};goTo('rutero');};
+const cant=(id,d)=>{S.draft[id]=Math.max(0,(S.draft[id]||0)+d);render();};
+const fijar=(id,v)=>{S.draft[id]=Math.max(0,parseInt(v)||0);render();};
+function atras(){
+  if(!Object.values(S.draft).some(c=>c>0))return goTo('tarifa');
+  sheet(`<h2>¿Descartar el pedido?</h2><div class="subtitle">Si vuelves atrás se perderán las cantidades.</div><div class="sheet-actions"><button class="ghost" onclick="closeSheet()">Seguir pedido</button><button class="primary danger" onclick="closeSheet();goTo('tarifa')">Descartar</button></div>`);
+}
+function confirmar(){
+  const items=Object.entries(S.draft).filter(([i,c])=>c>0).map(([i,c])=>{const p=S.productos.find(x=>x.id===i);return{productId:i,nombre:p.nombre,cantidad:c,precio:p.precio};});
+  if(!items.length)return toast('Selecciona al menos una especia');
+  const d=new Date(), id='ped'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  const folio='PED-'+String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+  setDoc(doc(db,'pedidos',id),{folio,fecha:Date.now(),cliente:S.cliente.trim()||'Sin nombre',vendedorUid:S.user.uid,vendedorNombre:S.nombre,tarifa:S.tarifa,items,facturado:false})
+    .catch(()=>toast('No se pudo enviar el pedido'));
+  S.draft={};S.cliente='';toast('Pedido confirmado: '+folio);goTo('pedidos');
+}
+const upd=(data)=>updateDoc(doc(db,'pedidos',S.pid),data).catch(()=>toast('No se pudo guardar el cambio'));
+const P=()=>S.pedidos.find(p=>p.id===S.pid);
+function mover(i,d){const it=[...P().items],j=i+d;[it[i],it[j]]=[it[j],it[i]];upd({items:it});}
+function editItem(i,k,v){const n=parseFloat(v);if(isNaN(n)||n<0){toast('Valor inválido');return render();}const it=P().items.map(x=>({...x}));it[i][k]=n;upd({items:it});}
+function quitar(i){upd({items:P().items.filter((x,j)=>j!==i)});}
+function agregarItem(){const p=S.productos.find(x=>x.id===$('addSel').value);if(p)upd({items:[...P().items,{productId:p.id,nombre:p.nombre,cantidad:1,precio:p.precio}]});}
+function facturar(){const p=P();if(!p.items.length)return toast('Agrega al menos una especia');upd({facturado:true,facturadoEn:Date.now(),total:tot(p)});toast('Factura '+p.folio+' generada');}
+function addProd(){const n=$('nn').value.trim();if(!n)return toast('Escribe el nombre');
+  setDoc(doc(db,'productos','p'+Date.now().toString(36)),{nombre:n,precio:Number($('np').value)}).catch(()=>toast('No se pudo guardar'));}
+function editProd(id){const p=S.productos.find(x=>x.id===id);
+  sheet(`<h2>Editar especia</h2><label for="en">Nombre</label><input type="text" id="en" value="${esc(p.nombre)}"><label for="ep">Precio</label><select id="ep">${TARIFAS.map(t=>`<option value="${t}" ${t===p.precio?'selected':''}>${money(t)}</option>`).join('')}</select>
+  <div class="sheet-actions"><button class="ghost" onclick="closeSheet()">Cancelar</button><button class="primary" onclick="saveProd('${id}')">Guardar</button></div>`);}
+function saveProd(id){const n=$('en').value.trim();if(!n)return toast('Escribe el nombre');updateDoc(doc(db,'productos',id),{nombre:n,precio:Number($('ep').value)});closeSheet();}
+function delProd(id){const p=S.productos.find(x=>x.id===id);
+  sheet(`<h2>Eliminar especia</h2><div class="subtitle">¿Quitar «${esc(p.nombre)}» del catálogo? Los pedidos ya hechos no cambian.</div><div class="sheet-actions"><button class="ghost" onclick="closeSheet()">Cancelar</button><button class="primary danger" onclick="deleteDoc(doc(db,'productos','${id}'));closeSheet()">Eliminar</button></div>`);}
+function seed(){[['Achiote',1500],['Ajo en polvo',1500],['Cilantro seco',1500],['Orégano',1500],['Canela en astilla',1600],['Comino',1600],['Paprika',1600],['Tomillo',1600],['Anís estrellado',1800],['Cúrcuma',1800],['Pimienta blanca',1800],['Cardamomo',1900],['Clavo de olor',1900],['Nuez moscada',1900],['Pimienta negra',1900]]
+  .forEach(([nombre,precio],i)=>setDoc(doc(db,'productos','p'+Date.now().toString(36)+i),{nombre,precio}));}
+async function addVend(){
+  const nombre=$('vn').value.trim(),email=$('ve').value.trim().toLowerCase();
+  if(!nombre||!okMail(email))return toast('Escribe el nombre y un correo válido');
+  try{
+    const sec=getApps().find(a=>a.name==='sec')||initializeApp(FIREBASE_CONFIG,'sec'), sa=getAuth(sec);
+    await crearCuenta(nombre,email,true,sa);await signOut(sa);
+    toast('Vendedor creado. Su contraseña se envió a '+email);
+  }catch(e){toast(msgErr(e));}
+}
+const togVend=(id,a)=>updateDoc(doc(db,'usuarios',id),{activo:a});
+
+Object.assign(window,{S,modo,registrar,olvide,entrar,salir,goTo,toggleFab,closeSheet,abrir,crearNuevo,elegir,cant,fijar,atras,confirmar,mover,editItem,quitar,agregarItem,facturar,addProd,editProd,saveProd,delProd,seed,addVend,togVend,deleteDoc,doc,db});
+</script>
+</body>
+</html>
